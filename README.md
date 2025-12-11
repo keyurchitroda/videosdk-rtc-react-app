@@ -1,70 +1,67 @@
-# Getting Started with Create React App
+1. Project Setup
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+Clone the repo
+git clone <your-repo-url>
+cd <project-folder>
 
-In the project directory, you can run:
+Install dependencies
+npm install
 
-### `npm start`
+Add your VideoSDK Token
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open src/API.js and replace the placeholder token with your own VideoSDK token.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Start the app
+npm start
+http://localhost:3000
 
-### `npm test`
+2. Description of how room switching is implemented
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+Normal switching uses VideoSDK’s:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+switchTo({ meetingId, token })
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+When the user clicks “Switch to Destination”:
+The SDK disconnects them from Room A.
+The SDK connects them to Room B.
+Their camera and microphone turn on again in Room B.
+The app updates the UI to show the new meeting ID.
+Use case: When you want the participant to fully move into another room.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. Explanation of Media Relay usage in this context
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Media Relay lets a host send their video/audio from Room A → Room B without leaving Room A.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    Flow:
+    Source room clicks Request Media Relay.
+    Destination room receives a request pop-up.
+    If destination accepts, it starts receiving the source’s camera/mic stream.
+    Source stays in Room A, but viewers in Room B see/hear them.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+    Use case:
+    Cross-room conversations
+    Broadcasting one host to many rooms
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+4. Notes & Limitations
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+switchTo() may cause a brief audio/video gap while reconnecting.
+Media Relay requires acceptance from the destination room.'
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Difference Between Normal Switch and Media Relay
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    Normal Room Switching:
+     - The user actually leaves Room A and joins Room B.
+     - Their audio and video stop briefly during the handover.
+     - Media is visible only in the room they join.
+    Media Relay Switching:
+     - The user stays in Room A, but their audio/video is sent to Room B.
+     - There is no interruption in their media.
+     - Their video/audio becomes visible in both rooms at the same time.
